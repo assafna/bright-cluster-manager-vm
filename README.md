@@ -95,8 +95,8 @@ This repository will include the instructions for installing and running Bright 
         ```
 
     - Running `cmha-setup`.
-        - __Note:__ this option is only meant for HA for Bright and this includes moving the /cm/shared and /home to an external shared storage (NAS or DAS or DRBD).
-1. Fix compute nodes DNS by running:
+        - __Note:__ this option is only meant for HA and includes moving `/cm/shared` and `/home` paths to an external shared storage (NAS, DAS or DRBD).
+1. __Optional:__ if needed, fix compute nodes DNS by running:
 
     ```bash
     cmsh
@@ -232,8 +232,8 @@ This repository will include the instructions for installing and running Bright 
     - Modify the `Count` column with the number of GPUs per compute node. No need to enter any other details.
     ![ ](images/cm-wlm-setup-23.png)
         - __Note:__ in case there are different number of GPUs in different compute nodes:
-        - Set the number of GPUs for one version of a compute node (e.g., a compute node with 2 GPUs).
-        - After the installation is complete duplicate the configuration and modify it for any other version (explained in the next bullet).
+            - Set the number of GPUs for one version of a compute node (e.g., a compute node with 2 GPUs).
+            - After the installation is complete duplicate the configuration and modify it for any other version (explained in the next bullet).
     - Select `yes` for configuring Pyxis plugin.
     ![ ](images/cm-wlm-setup-24.png)
     - Optional: keep Cgroups constraints empty.
@@ -245,7 +245,7 @@ This repository will include the instructions for installing and running Bright 
     - Optional: save the configuration file in the default location.
     ![ ](images/cm-wlm-setup-28.png)
     - Complete the setup.
-    - __Note:__ if an error of `Temporary failure resolving 'archive.ubuntu.com'` appears undo the installation by pressing `u`, then try the following solutions for each software image and run again:
+    - __Note:__ if an error of `Temporary failure resolving 'archive.ubuntu.com'` appears undo the installation by pressing `u`, then try the following solutions for each software image and reinstall:
         - Relink `resolv.conf`:
 
             ```bash
@@ -283,7 +283,7 @@ This repository will include the instructions for installing and running Bright 
             - Remove all listed by running `remove <configuration-overlay>` for each one, then exit with `quit`.
 
 1. In case there are different number of GPUs in different compute nodes, clone and set the configuration overlays:
-    - First, set the categories of the original configuration overlay so they won't include the different categories:
+    - First, set the categories of the original configuration overlay so it won't include the different categories:
 
     ```bash
     cmsh
@@ -416,6 +416,7 @@ This repository will include the instructions for installing and running Bright 
 1. For vGPU:
     1. Uninstall the existing CUDA driver with `sudo apt -y remove --purge cuda-driver`.
     1. Install the vGPU driver:
+        - TODO: add images.
         - Download the vGPU driver from [NVIDIA Application Hub](https://nvid.nvidia.com/) -> NVIDIA Licensing Portal -> Software Downloads.
         - Copy the vGPU driver file ending with `.run` to the compute node.
         - Run `cmhod +x <file path>`.
@@ -449,7 +450,7 @@ This repository will include the instructions for installing and running Bright 
         - Restart the Docker daemon to complete the installation after setting the default runtime by running: `systemctl restart docker`.
 1. Make sure `/home` directory is mounted by running `cat /etc/fstab | grep "master:/home"`.
 1. Login to the head node.
-1. Grab the node image to your default image by running:
+1. Grab the node image to your relevant image by running:
 
     ```bash
     cmsh
@@ -489,11 +490,10 @@ This example uses Horovod and TensorFlow.
 
     ```
 
+    - __Note:__ if an error of `Invalid MPI plugin name` is received when running a Slurm job with `--mpi=pmix` it is probably because of a missing package. To solve it:
+        1. SSH to the relevant node.
+        1. Run `/cm/shared/apps/cm-pmix3/3.1.4/bin/pmix_info` to view the issue:
+        1. Install the relevant package by running `apt install libevent-pthreads-2.1-7`.
+        1. Grab the image.
+
 1. Examine the results and observe the GPU usage.
-
-__Note:__ if an error of `Invalid MPI plugin name` is received when running a Slurm job with `--mpi=pmix` it is probably because of a missing package. To solve it:
-
-1. SSH to the relevant node.
-1. Run `/cm/shared/apps/cm-pmix3/3.1.4/bin/pmix_info` to view the issue:
-1. Install the relevant package by running `apt install libevent-pthreads-2.1-7`.
-1. Grab the image.
